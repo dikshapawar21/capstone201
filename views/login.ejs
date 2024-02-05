@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-200">
+    <main class="flex flex-col items-center h-screen justify-center">
+      <div class="mb-48 bg-white p-8 rounded-xl shadow-lg">
+        <h1 class="font-semibold text-4xl pb-4 text-center">Log-in</h1>
+        <br />
+        <form action="/login" method="post">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <label for="iid" class="pl-8 text-lg">Email:</label>
+          <input
+            class="border-black border-2 mb-6 rounded-md"
+            type="email"
+            name="email"
+            id="email"
+            placeholder=" Enter email"
+          /><br />
+          <label for="password" class="text-lg">Password:</label>
+          <input
+            class="border-black border-2 mb-4 rounded-md"
+            type="password"
+            name="Password"
+            id="password"
+            placeholder=" Enter password"
+          /><br /><br />
+          <input
+            class="border-2 border-black p-1 rounded-md mb-4 bg-slate-400"
+            type="submit"
+          /><br />
+          <p>Don't have an account? Sign up</p>
+          <a href="/educatorSignup" class="text-blue-700 underline"
+            >As educator</a
+          >
+          <p>OR</p>
+          <a href="/studentSignup" class="text-blue-700 underline"
+            >As student</a
+          >
+        </form>
+      </div>
+    </main>
+  </body>
+</html>
