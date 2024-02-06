@@ -164,7 +164,7 @@ app.post("/user", async (req, res) => {
   const hashPwd = await bcrypt.hash(req.body.password, saltRounds);
   try {
     if (req.body.password === "") {
-      throw new Error("Validation notEmpty on password failed");
+      throw new Error("password is empty");
     }
     console.log("Creating user: ", req.body);
     let user = await User.create({
