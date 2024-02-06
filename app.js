@@ -2,7 +2,7 @@ const express = require("express");
 const csurf = require("tiny-csrf");
 const cookieParser = require("cookie-parser");
 const app = express();
-const { User } = require("./models");
+const { User, Course } = require("./models");
 
 const passport = require("passport");
 const connectEnsureLogin = require("connect-ensure-login");
@@ -12,6 +12,7 @@ const LocalStrategy = require("passport-local");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const path = require("path");
+const { Op } = require("sequelize");
 
 passport.use(
   new LocalStrategy(
@@ -79,6 +80,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get("/", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.redirect("/home");
+  }
   res.render("index");
 });
 
@@ -94,12 +98,65 @@ app.get("/studentSignup", (req, res) => {
   res.render("studentSignup", { csrfToken: req.csrfToken() });
 });
 
-app.get("/home", connectEnsureLogin.ensureLoggedIn(), (req, res) => {
+app.get("/signout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    res.redirect("/");
+  });
+});
+
+app.get("/home", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   if (!req.isAuthenticated()) return res.redirect("/login");
   if (req.user.designation === "educator") {
-    res.render("educator");
+    let myCourses = await Course.findAll({
+      where: {
+        userId: req.user.id,
+      },
+    });
+    myCourses = myCourses.map((course) => ({
+      courseId: course.id,
+      description: course.dataValues.description,
+      courseName: course.dataValues.name,
+    }));
+    let notMyCourses = await Course.findAll({
+      where: {
+        userId: {
+          [Op.ne]: req.user.id,
+        },
+      },
+    });
+    notMyCourses = notMyCourses.map((course) => ({
+      courseId: course.id,
+      description: course.dataValues.description,
+      courseName: course.dataValues.name,
+    }));
+    console.log(myCourses);
+    res.render("educator", { myCourses, notMyCourses });
   } else {
     res.render("student");
+  }
+});
+
+app.get("/newCourse", connectEnsureLogin.ensureLoggedIn(), (req, res) => {
+  if (req.user.designation === "educator") {
+    res.render("newCourse", { csrfToken: req.csrfToken() });
+  } else {
+    res.redirect("/login");
+  }
+});
+
+app.post("/course", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  if (req.user.designation === "educator") {
+    console.log(req.body);
+    const course = await Course.create({
+      name: req.body.name,
+      description: req.body.description,
+      userId: req.user.id,
+    });
+    console.log("Course created: ", course.dataValues);
+    res.redirect("/home");
+  } else {
+    res.status(403).redirect("/");
   }
 });
 

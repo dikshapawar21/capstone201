@@ -13,8 +13,9 @@
         <h2 class="font-bold text-2xl text-center">As Educator</h2>
         <br />
 
-        <form>
+        <form action="/user" method="post">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <input type="hidden" name="designation" value="educator" />
           <label for="fname" class="text-lg">First name:</label>
           <input
             class="border-black border-2 mb-4 rounded-md"

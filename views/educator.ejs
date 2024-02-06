@@ -1,50 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>My subject</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-    </head>
-    <body class="font-serif bg-slate-100">
-        <h1 class="text-center font-semibold text-5xl pt-4 pb-2 mt-16">Welcome!</h1>
-        <h2 class="text-start pl-32 underline text-3xl py-3">Administrative actions</h2>
-        <button
-            class="signout bg-red-500 absolute top-10 right-28 py-1 px-1 border-2 border-black font-semibold"
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My subject</title>
+    <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+  </head>
+  <body class="font-serif bg-slate-100">
+    <h1 class="text-center font-semibold text-5xl pt-4 pb-2 mt-16">Welcome!</h1>
+    <h2 class="text-start pl-32 underline text-3xl py-3">
+      Administrative actions
+    </h2>
+    <a
+      href="/signout"
+      class="signout bg-red-500 absolute top-10 right-28 py-1 px-1 border-2 border-black font-semibold"
+    >
+      Signout
+    </a>
+
+    <main>
+      <a
+        href="/newCourse"
+        class="newCourse border-2 border-black px-1 ml-32 mb-4 text-xl rounded-sm mx-2 bg-violet-600 my-4"
+        >Create a new course</a
+      ><br />
+      <button
+        class="reports border-2 border-black px-1 ml-32 mb-4 text-xl rounded-sm mx-2 bg-green-500"
+      >
+        View reports
+      </button>
+      <p class="underline text-2xl text-center mb-8">My Courses</p>
+
+      <div class="courses-available grid grid-cols-4 mx-8">
+        <% myCourses.forEach(course => { %>
+        <div
+          class="card pb-4 border bg-white rounded-md shadow-md w-60 mx-4 my-3 flex flex-col items-start justify-between"
         >
-            Signout
-        </button>
+          <h3 class="px-2 text-2xl mt-2"><%= course.courseName %></h3>
+          <div class="h-full px-4 min-h-16"><%= course.description %></div>
+          <a
+            href="/course/<%= course.courseId %>"
+            class="view border-2 border-black px-1 rounded-sm mx-2 bg-violet-500"
+          >
+            View course
+          </a>
+        </div>
+        <% }) %>
+      </div>
 
-        <main>
-            <button class="newCourse border-2 border-black px-1 ml-32 mb-4 text-xl rounded-sm mx-2 bg-violet-600">Create a new course</button><br>
-            <button class="myCourses border-2 border-black px-1 ml-32 mb-4 text-xl rounded-sm mx-2 bg-slate-500">My courses</button><br>
-            <button class="reports border-2 border-black px-1 ml-32 mb-4 text-xl rounded-sm mx-2 bg-green-500">View reports</button>
+      <p class="underline text-2xl text-center mb-8">Available Courses</p>
 
-            <p class="underline text-2xl text-center mb-8">Available Courses</p>
-
-            <div class="courses-available grid grid-cols-4 mx-8">
-                <div class="card pb-4 border bg-white rounded-md shadow-md w-60 mx-4 my-3">
-                    <h3 class="px-2 pb-2 text-2xl">Course name</h3>
-                    <p class="px-3 pb-2 text-md">Teacher name</p>
-                    <button class="view border-2 border-black px-1 rounded-sm mx-2 bg-violet-500">View course</button>
-                    <button class="enroll border-2 border-black px-1 rounded-sm mx-2 bg-green-500">Enroll</button>
-                </div>
-                
-                <div class="card pb-4 border bg-white rounded-md shadow-md w-60 mx-4 my-3">
-                    <h3 class="px-2 pb-2 text-2xl">Course name</h3>
-                    <p class="px-3 pb-2 text-md">Teacher name</p>
-                    <button class="view border-2 border-black px-1 rounded-sm mx-2 bg-violet-500">View course</button>
-                    <button class="enroll border-2 border-black px-1 rounded-sm mx-2 bg-green-500">Enroll</button>
-                </div>
-                
-                <div class="card pb-4 border bg-white rounded-md shadow-md w-60 mx-4 my-3">
-                    <h3 class="px-2 pb-2 text-2xl">Course name</h3>
-                    <p class="px-3 pb-2 text-md">Teacher name</p>
-                    <button class="view border-2 border-black px-1 rounded-sm mx-2 bg-violet-500">View course</button>
-                    <button class="enroll border-2 border-black px-1 rounded-sm mx-2 bg-green-500">Enroll</button>
-                </div>
-                
-            </div>
-        </main>
-    </body>
+      <div class="courses-available grid grid-cols-4 mx-8">
+        <% notMyCourses.forEach(course => { %>
+        <div
+          class="card pb-4 border bg-white rounded-md shadow-md w-60 mx-4 my-3 flex flex-col items-start justify-between"
+        >
+          <h3 class="px-2 text-2xl mt-2"><%= course.courseName %></h3>
+          <div class="h-full px-4 min-h-16"><%= course.description %></div>
+          <a
+            href="/course/<%= course.courseId %>"
+            class="view border-2 border-black px-1 rounded-sm mx-2 bg-violet-500"
+          >
+            View course
+          </a>
+        </div>
+        <% }) %>
+      </div>
+    </main>
+    <script>
+      console.log("<%= myCourses%>");
+    </script>
+  </body>
 </html>
