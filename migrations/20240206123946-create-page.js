@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Chapters", {
+    await queryInterface.createTable("Pages", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -13,12 +13,16 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      courseId: {
+      content: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+      },
+      chapterId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         onDelete: "CASCADE",
         references: {
-          model: "Courses",
+          model: "Chapters",
           key: "id",
         },
       },
@@ -33,6 +37,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Chapters");
+    await queryInterface.dropTable("Pages");
   },
 };

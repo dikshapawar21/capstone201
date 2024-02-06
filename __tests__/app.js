@@ -116,4 +116,23 @@ describe("Learning Management Application", function () {
     expect(res.text.includes("/course")).toBe(true);
     expect(res.statusCode).toBe(302);
   });
+  test("Create a page", async () => {
+    const agent = request.agent(server);
+    await login(agent, "usera@gmail.com", "userARocks");
+    let csrfToken = extractCSRFToken(await agent.get("/login"));
+    let res = await agent.post("/chapter").send({
+      _csrf: csrfToken,
+      name: "Frontend Course",
+      courseId: 2,
+    });
+    csrfToken = extractCSRFToken(await agent.get("/login"));
+    res = await agent.post("/page").send({
+      _csrf: csrfToken,
+      name: "Why HTML",
+      content: "Because HTML makes webpage body",
+      chapterId: 2,
+    });
+    console.log(res.text.includes("/chapter"));
+    expect(res.statusCode).toBe(302);
+  });
 });

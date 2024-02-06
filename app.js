@@ -2,7 +2,7 @@ const express = require("express");
 const csurf = require("tiny-csrf");
 const cookieParser = require("cookie-parser");
 const app = express();
-const { User, Course, Chapter } = require("./models");
+const { User, Course, Chapter, Page } = require("./models");
 
 const passport = require("passport");
 const connectEnsureLogin = require("connect-ensure-login");
@@ -257,14 +257,14 @@ app.get(
 );
 
 app.post("/chapter", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  const { courseId } = req.body;
+  const { courseId, name } = req.body;
   const course = await Course.findByPk(courseId);
   if (course.userId !== req.user.id) {
     res.status(400).redirect("/home");
   }
   const chapter = await Chapter.create({
     courseId,
-    name: req.body.name,
+    name,
   });
   console.log("New Chapter created:", chapter);
   res.redirect("/course/" + courseId);
@@ -291,5 +291,24 @@ app.delete(
     }
   }
 );
+
+//Page routes
+app.post("/page", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  try {
+    if (req.user.designation !== "educator") {
+      return res.redirect("/home");
+    }
+    const { name, content, chapterId } = req.body;
+    const page = await Page.create({
+      name,
+      content,
+      chapterId,
+    });
+    console.log("Created Page:", page);
+    res.redirect("/chapter/" + chapterId);
+  } catch (error) {
+    res.json(err);
+  }
+});
 
 module.exports = app;
