@@ -145,6 +145,11 @@ app.get("/newCourse", connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   }
 });
 
+app.get("/course/:id", async (req, res) => {
+  const course = await Course.findByPk(req.params.id, { include: User });
+  res.render("viewCourse", { course });
+});
+
 app.post("/course", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   if (req.user.designation === "educator") {
     console.log(req.body);

@@ -64,8 +64,9 @@ describe("Learning Management Application", function () {
     const csrfToken = extractCSRFToken(await agent.get("/login"));
     let res = await agent.post("/course").send({
       _csrf: csrfToken,
-      name: "Python Language Course",
-      description: "Comprehensive course on python",
+      name: "Frontend Course",
+      description:
+        "Comprehensive course on frontend with HTML CSS and JavaScript",
     });
     expect(res.text.includes("/home")).toBe(true);
     expect(res.statusCode).toBe(302);

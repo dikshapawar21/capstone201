@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="font-serif">
+    <h1 class="text-5xl py-8 pb-0 pl-40"><%= course.name %></h1>
+    <p class="text-xl py-8 pl-40"><%= course.description %></p>
+    <h2 class="text-3xl pl-40 underline">Chapters</h2>
+    <br />
+    <main>
+      <div
+        class="card px-2 pb-1 border bg-yellow-100 rounded-md shadow-md w-60 relative ml-40 my-4"
+      >
+        <p>HTML</p>
+      </div>
+      <div
+        class="card px-2 pb-1 border bg-yellow-100 rounded-md shadow-md w-60 relative ml-40 my-4"
+      >
+        <p>CSS</p>
+      </div>
+      <div
+        class="card px-2 pb-1 border bg-yellow-100 rounded-md shadow-md w-60 relative ml-40 my-4"
+      >
+        <p>Javascript</p>
+      </div>
+    </main>
+    <div
+      class="card pb-4 px-2 borde absolute top-8 right-14 rounded-md w-60 m-4 border-black border-2"
+    >
+      <h3 class="px-2 pb-2 text-3xl"><%= course.name %></h3>
+      <p class="px-3 pb-2 text-lg">
+        <%= course.User.firstName %> <%= course.User.lastName %>
+      </p>
+      <button
+        class="enroll border-2 border-black px-1 rounded-sm mx-2 bg-green-500"
+      >
+        Enroll
+      </button>
+    </div>
+  </body>
+</html>
