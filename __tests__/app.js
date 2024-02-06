@@ -19,7 +19,7 @@ const login = async (agent, username, password) => {
   });
 };
 
-describe("Todo Application", function () {
+describe("Learning Management Application", function () {
   beforeAll(async () => {
     await db.sequelize.sync({ force: true });
     server = app.listen(4000, () => {});
@@ -55,6 +55,31 @@ describe("Todo Application", function () {
     res = await agent.get("/signout");
     expect(res.statusCode).toBe(302);
     res = await agent.get("/home");
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Create a course", async () => {
+    const agent = request.agent(server);
+    await login(agent, "usera@gmail.com", "userARocks");
+    const csrfToken = extractCSRFToken(await agent.get("/login"));
+    let res = await agent.post("/course").send({
+      _csrf: csrfToken,
+      name: "Python Language Course",
+      description: "Comprehensive course on python",
+    });
+    expect(res.text.includes("/home")).toBe(true);
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Deletes a course", async () => {
+    const agent = request.agent(server);
+    await login(agent, "usera@gmail.com", "userARocks");
+    const csrfToken = extractCSRFToken(await agent.get("/login"));
+    let res = await agent.delete("/course").send({
+      _csrf: csrfToken,
+      id: 1,
+    });
+    expect(res.text.includes("/home")).toBe(true);
     expect(res.statusCode).toBe(302);
   });
 });

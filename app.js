@@ -160,6 +160,15 @@ app.post("/course", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   }
 });
 
+app.delete("/course", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  const course = await Course.findByPk(req.body.id);
+  if (course.dataValues.userId !== req.user.id) {
+    res.status(400).redirect("/");
+  }
+  await course.destroy();
+  return res.redirect("/home");
+});
+
 app.post("/user", async (req, res) => {
   const hashPwd = await bcrypt.hash(req.body.password, saltRounds);
   try {
