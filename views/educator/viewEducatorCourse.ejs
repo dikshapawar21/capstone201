@@ -3,12 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
     <title>Add Chapters</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body>
     <main class="font-serif">
-      <h1 class="font-semibold text-4xl mt-20 ml-60"><%= course.name %></h1>
+      <div class="w-full flex items-center justify-between h-32">
+        <h1 class="font-semibold text-4xl ml-60 flex"><%= course.name %></h1>
+        <button
+          class="mr-20 bg-red-300 border-4 border-black px-4 py-2"
+          onclick="deleteCourse()"
+        >
+          Delete course
+        </button>
+      </div>
       <br />
       <div class="ml-60 text-lg"><%= course.description %></div>
       <br />
@@ -20,7 +29,7 @@
       <div class="ml-60 flex flex-col items-start">
         <% for(let i = 0; i < chapters.length; i++) { %>
         <a
-          class="mb-2 bg-amber-100 w-80 px-2 pr-80 py-2"
+          class="mb-2 bg-amber-100 w-80 px-2 py-2 flex"
           href="/chapter/<%= chapters[i].id %>"
           ><%= chapters[i].name %></a
         >
@@ -36,4 +45,20 @@
       </a>
     </main>
   </body>
+  <script>
+    async function deleteCourse() {
+      const res = await fetch("/course", {
+        method: "delete",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "<%= csrfToken %>",
+        },
+        body: JSON.stringify({
+          _csrf:"<%= csrfToken %>",
+          id:<%= course.id %>
+        }),
+      });
+      window.location = res.url;
+    }
+  </script>
 </html>

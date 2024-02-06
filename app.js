@@ -32,12 +32,10 @@ passport.use(
               else done(null, false, { message: "Invalid password" });
             })
             .catch((err) => {
-              console.log(err);
               return done(err);
             });
         })
         .catch((err) => {
-          console.log(err);
           done(err);
         });
     }
@@ -91,11 +89,11 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/educatorSignup", (req, res) => {
-  res.render("educatorSignup", { csrfToken: req.csrfToken() });
+  res.render("educator/educatorSignup", { csrfToken: req.csrfToken() });
 });
 
 app.get("/studentSignup", (req, res) => {
-  res.render("studentSignup", { csrfToken: req.csrfToken() });
+  res.render("student/studentSignup", { csrfToken: req.csrfToken() });
 });
 
 app.get("/signout", (req, res, next) => {
@@ -130,10 +128,9 @@ app.get("/home", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
       description: course.dataValues.description,
       courseName: course.dataValues.name,
     }));
-    console.log(myCourses);
-    res.render("educator", { myCourses, notMyCourses });
+    res.render("educator/educator", { myCourses, notMyCourses });
   } else {
-    res.render("student");
+    res.render("student/student");
   }
 });
 
@@ -151,7 +148,6 @@ app.post("/user", async (req, res) => {
       designation: req.body.designation,
       password: hashPwd,
     });
-    console.log("User created:", user.dataValues);
     req.login(user, (err) => {
       if (err) {
         console.log(err);
@@ -171,7 +167,6 @@ app.post(
     failureFlash: true,
   }),
   async (req, res) => {
-    console.log(req.body);
     res.redirect("/home");
   }
 );
@@ -193,21 +188,23 @@ app.get("/course/:id", async (req, res) => {
     },
   });
   if (req.user && req.user.designation === "educator") {
-    return res.render("viewEducatorCourse", { course, chapters });
+    return res.render("educator/viewEducatorCourse", {
+      course,
+      chapters,
+      csrfToken: req.csrfToken(),
+    });
   } else {
-    return res.render("viewStudentCourse", { course, chapters });
+    return res.render("student/viewStudentCourse", { course, chapters });
   }
 });
 
 app.post("/course", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   if (req.user.designation === "educator") {
-    console.log(req.body);
     const course = await Course.create({
       name: req.body.name,
       description: req.body.description,
       userId: req.user.id,
     });
-    console.log("Course created: ", course.dataValues);
     res.redirect("/home");
   } else {
     res.status(403).redirect("/");
@@ -217,7 +214,7 @@ app.post("/course", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 app.delete("/course", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const course = await Course.findByPk(req.body.id);
   if (course.dataValues.userId !== req.user.id) {
-    res.status(400).redirect("/");
+    res.redirect("/home");
   }
   await course.destroy();
   return res.redirect("/home");
@@ -249,9 +246,11 @@ app.get(
       where: { id: chapterId },
       include: Course,
     });
-    res.render("viewEducatorChapter", {
+    const pages = await Page.findAll({ where: { chapterId } });
+    res.render("educator/viewEducatorChapter", {
+      csrfToken: req.csrfToken(),
       chapter,
-      pages: [],
+      pages,
     });
   }
 );
@@ -266,7 +265,6 @@ app.post("/chapter", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     courseId,
     name,
   });
-  console.log("New Chapter created:", chapter);
   res.redirect("/course/" + courseId);
 });
 
@@ -284,7 +282,7 @@ app.delete(
         res.status(400).redirect("/home");
       }
       await chapter.destroy();
-      res.redirect("/course/" + chapter.Course.id);
+      res.redirect("/course/" + chapter.courseId);
     } catch (err) {
       console.log(err);
       res.json(err);
@@ -293,6 +291,59 @@ app.delete(
 );
 
 //Page routes
+app.get(
+  "/chapter/:chapId/newPage",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    if (req.user.designation !== "educator") {
+      return res.redirect("/");
+    }
+    res.render("newPage", {
+      csrfToken: req.csrfToken(),
+      chapterId: req.params.chapId,
+    });
+  }
+);
+
+app.get("/page/:id", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  const chapterId = (await Page.findByPk(req.params.id)).chapterId;
+  const thisPage = await Page.findByPk(req.params.id);
+  const allPages = await Page.findAll({
+    where: {
+      chapterId,
+    },
+  });
+  let pageId = Number(req.params.id);
+  let nextPageId = -1;
+  let prevPageId = -1;
+  for (let i = 0; i < allPages.length; i++) {
+    console.log(allPages[i].id);
+    console.log(pageId);
+    if (allPages[i].id === pageId) {
+      if (i !== allPages.length - 1) {
+        nextPageId = allPages[i + 1].id;
+      }
+      if (i !== 0) {
+        prevPageId = allPages[i - 1].id;
+      }
+      break;
+    }
+  }
+  if (req.user.designation === "educator") {
+    return res.render("educator/viewEducatorPage", {
+      thisPage,
+      nextPageId,
+      prevPageId,
+    });
+  } else {
+    return res.render("student/viewStudentPage", {
+      thisPage,
+      nextPageId,
+      prevPageId,
+    });
+  }
+});
+
 app.post("/page", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   try {
     if (req.user.designation !== "educator") {
@@ -304,10 +355,9 @@ app.post("/page", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
       content,
       chapterId,
     });
-    console.log("Created Page:", page);
     res.redirect("/chapter/" + chapterId);
   } catch (error) {
-    res.json(err);
+    res.redirect("/");
   }
 });
 
@@ -328,7 +378,7 @@ app.delete("/page", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     },
   });
   if (page.Chapter.Course.User.id !== req.user.id) {
-    res.redirect("/");
+    return res.redirect("/");
   }
   await page.destroy();
   res.redirect("/chapter/" + page.Chapter.id);

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New course</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <form class="font-serif" action="/page" method="post">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <input type="hidden" name="chapterId" value="<%= chapterId %>" />
+      <h1 class="font-semibold text-4xl mt-10 ml-60 mb-4">Create a new page</h1>
+      <label for="new-course" class="ml-60 text-xl">Title of the page:</label
+      ><br />
+      <input
+        type="text"
+        id="new-course"
+        name="name"
+        class="border-2 border-black rounded-sm text-xl ml-60"
+      /><br />
+      <label for="description" class="ml-60 text-xl">Content:</label><br />
+      <textarea
+        name="content"
+        id="description"
+        cols="80"
+        rows="10"
+        class="ml-60 border"
+      ></textarea
+      ><br /><br />
+      <button
+        class="border-2 border-black px-1 rounded-sm mx-2 bg-violet-500 ml-60 mt-4 text-xl"
+      >
+        Create course
+      </button>
+    </form>
+  </body>
+</html>

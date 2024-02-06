@@ -22,7 +22,7 @@
           placeholder=" Chapter name"
           class="border-2 border-black rounded-sm text-xl ml-60"
         /><br /><br />
-        <select name="courseId" class="ml-60 px-4 py-2">
+        <select name="courseId" class="ml-60 px-4 py-2" required>
           <option value="" selected disabled>Select course</option>
           <% for(let i = 0; i < courses.length; i++) { %>
           <option value="<%= courses[i].id %>"><%= courses[i].name %></option>

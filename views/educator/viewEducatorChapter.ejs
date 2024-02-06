@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <main class="font-serif">
+      <div class="w-full flex items-center justify-between h-32">
+        <h1 class="font-semibold text-4xl ml-60"><%= chapter.name %></h1>
+        <button
+          class="mr-20 bg-red-300 border-4 border-black px-4 py-2"
+          onclick="deleteChapter()"
+        >
+          Delete chapter
+        </button>
+      </div>
+      <br /><br />
+      <h2 class="ml-60 text-2xl underline">Pages</h2>
+      <br />
+      <% if (pages.length === 0) { %>
+      <p class="ml-60 text-lg">There are no pages available. Create one?</p>
+      <% } else { %>
+      <div class="ml-60 flex flex-col">
+        <% for(let i = 0; i < pages.length; i++) { %>
+        <a
+          href="/page/<%= pages[i].id %>"
+          class="mb-2 bg-amber-100 w-80 px-4 py-2"
+          ><%= pages[i].name %></a
+        >
+        <% } %>
+      </div>
+      <% } %>
+      <a
+        href="/chapter/<%= chapter.id %>/newPage"
+        class="border-2 border-black px-1 rounded-sm mx-2 bg-violet-500 ml-60 mt-4 text-xl my-4"
+      >
+        Create a new page
+      </a>
+    </main>
+  </body>
+  <script>
+    async function deleteChapter() {
+      const res = await fetch("/chapter", {
+        headers:{
+          "Content-Type":"application/json",
+          "X-CSRFToken":"<%= csrfToken %>",
+        },
+        method: "delete",
+        body: JSON.stringify({
+          _csrf: "<%= csrfToken %>",
+          chapterId:<%= chapter.id %>,
+        }),
+      });
+      window.location = res.url;
+    }
+  </script>
+</html>

@@ -9,7 +9,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Chapter.belongsTo(models.Course, { foreignKey: "courseId" });
+      Chapter.belongsTo(models.Course, {
+        foreignKey: "courseId",
+        onDelete: "CASCADE",
+      });
+      Chapter.hasMany(models.Page, {
+        foreignKey: "chapterId",
+        onDelete: "CASCADE",
+      });
     }
   }
   Chapter.init(
