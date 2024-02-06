@@ -251,7 +251,7 @@ app.get(
     });
     res.render("viewEducatorChapter", {
       chapter,
-      pages: [{ name: "SOMETING" }, { name: "SLKJSFLKJF" }],
+      pages: [],
     });
   }
 );
