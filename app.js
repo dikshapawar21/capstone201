@@ -2,7 +2,7 @@ const express = require("express");
 const csurf = require("tiny-csrf");
 const cookieParser = require("cookie-parser");
 const app = express();
-const { User, Course, Chapter, Page } = require("./models");
+const { User, Course, Chapter, Page, Enrollment } = require("./models");
 
 const passport = require("passport");
 const connectEnsureLogin = require("connect-ensure-login");
@@ -130,7 +130,28 @@ app.get("/home", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     }));
     res.render("educator/educator", { myCourses, notMyCourses });
   } else {
-    res.render("student/student");
+    const enrolled = await Enrollment.findAll({
+      where: {
+        userId: req.user.id,
+      },
+      include: User,
+    });
+    const enrolledIdList = (
+      await Enrollment.findAll({ where: { userId: req.user.id } })
+    ).map((e) => e.courseId);
+    const notEnrolled = await Course.findAll({
+      where: {
+        id: {
+          [Op.notIn]: enrolledIdList,
+        },
+      },
+      include: User,
+    });
+    res.render("student/student", {
+      enrolled,
+      notEnrolled,
+      csrfToken: req.csrfToken(),
+    });
   }
 });
 
@@ -194,7 +215,17 @@ app.get("/course/:id", async (req, res) => {
       csrfToken: req.csrfToken(),
     });
   } else {
-    return res.render("student/viewStudentCourse", { course, chapters });
+    const isEnrolled =
+      (
+        await Enrollment.findAll({
+          where: { userId: req.user.id, courseId: Number(req.params.id) },
+        })
+      ).length > 0;
+    return res.render("student/viewStudentCourse", {
+      course,
+      chapters,
+      isEnrolled,
+    });
   }
 });
 
@@ -246,6 +277,16 @@ app.get(
       where: { id: chapterId },
       include: Course,
     });
+    if (
+      (
+        await Enrollment.findOne({
+          where: { userId: req.user.id, courseId: chapter.Course.id },
+        })
+      ).length === 0 &&
+      chapter.Course.userId !== req.user.id
+    ) {
+      return res.redirect("/home");
+    }
     const pages = await Page.findAll({ where: { chapterId } });
     res.render("educator/viewEducatorChapter", {
       csrfToken: req.csrfToken(),
@@ -307,6 +348,20 @@ app.get(
 
 app.get("/page/:id", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const chapterId = (await Page.findByPk(req.params.id)).chapterId;
+  const chapter = await Chapter.findOne({
+    where: { id: chapterId },
+    include: { model: Course },
+  });
+  if (
+    (
+      await Enrollment.findOne({
+        where: { userId: req.user.id, courseId: chapter.Course.id },
+      })
+    ).length === 0 &&
+    chapter.Course.userId !== req.user.id
+  ) {
+    return res.redirect("/home");
+  }
   const thisPage = await Page.findByPk(req.params.id);
   const allPages = await Page.findAll({
     where: {
@@ -317,8 +372,6 @@ app.get("/page/:id", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   let nextPageId = -1;
   let prevPageId = -1;
   for (let i = 0; i < allPages.length; i++) {
-    console.log(allPages[i].id);
-    console.log(pageId);
     if (allPages[i].id === pageId) {
       if (i !== allPages.length - 1) {
         nextPageId = allPages[i + 1].id;
@@ -382,6 +435,19 @@ app.delete("/page", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   }
   await page.destroy();
   res.redirect("/chapter/" + page.Chapter.id);
+});
+
+app.post("/enroll", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  if (req.user.designation !== "student") {
+    res.redirect("/");
+  }
+  const { courseId } = req.body;
+  const userId = req.user.id;
+  const enrollment = await Enrollment.create({
+    courseId,
+    userId,
+  });
+  res.redirect(`/home`);
 });
 
 module.exports = app;

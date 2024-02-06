@@ -136,7 +136,7 @@ describe("Learning Management Application", function () {
     expect(res.statusCode).toBe(302);
   });
 
-  test("Create a page", async () => {
+  test("Deletes a page", async () => {
     const agent = request.agent(server);
     await login(agent, "usera@gmail.com", "userARocks");
     let csrfToken = extractCSRFToken(await agent.get("/login"));
@@ -145,6 +145,26 @@ describe("Learning Management Application", function () {
       pageId: 1,
     });
     expect(res.text.includes("/chapter")).toBe(true);
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Enroll in a course", async () => {
+    const agent = request.agent(server);
+    let csrfToken = extractCSRFToken(await agent.get("/studentSignup"));
+    let res = await agent.post("/user").send({
+      _csrf: csrfToken,
+      firstName: "Student",
+      lastName: "Pawar",
+      email: "studentpawar@gmail.com",
+      password: "1234567890",
+      designation: "student",
+    });
+    csrfToken = extractCSRFToken(await agent.get("/home"));
+    res = await agent.post("/enroll").send({
+      _csrf: csrfToken,
+      courseId: 2,
+    });
+    expect(res.text.includes("/home")).toBe(true);
     expect(res.statusCode).toBe(302);
   });
 });

@@ -11,22 +11,14 @@
     <p class="text-xl py-8 pl-40"><%= course.description %></p>
     <h2 class="text-3xl pl-40 underline">Chapters</h2>
     <br />
-    <main>
-      <div
-        class="card px-2 pb-1 border bg-yellow-100 rounded-md shadow-md w-60 relative ml-40 my-4"
-      >
-        <p>HTML</p>
-      </div>
-      <div
-        class="card px-2 pb-1 border bg-yellow-100 rounded-md shadow-md w-60 relative ml-40 my-4"
-      >
-        <p>CSS</p>
-      </div>
-      <div
-        class="card px-2 pb-1 border bg-yellow-100 rounded-md shadow-md w-60 relative ml-40 my-4"
-      >
-        <p>Javascript</p>
-      </div>
+    <main class="flex flex-col">
+      <% for(let i = 0; i < chapters.length; i++) { %>
+      <a <% if(isEnrolled) { %>
+        href="/chapter/<%= chapters[i].id %>" <% } %> class="card px-2 pb-1
+        border bg-yellow-100 rounded-md shadow-md w-60 relative ml-40 my-2" >
+        <%= chapters[i].name %>
+      </a>
+      <% } %>
     </main>
     <div
       class="card pb-4 px-2 borde absolute top-8 right-14 rounded-md w-60 m-4 border-black border-2"
@@ -35,11 +27,13 @@
       <p class="px-3 pb-2 text-lg">
         <%= course.User.firstName %> <%= course.User.lastName %>
       </p>
-      <button
-        class="enroll border-2 border-black px-1 rounded-sm mx-2 bg-green-500"
-      >
-        Enroll
-      </button>
+      <form action="">
+        <button
+          class="enroll border-2 border-black px-1 rounded-sm mx-2 bg-green-500"
+        >
+          Enroll
+        </button>
+      </form>
     </div>
   </body>
 </html>

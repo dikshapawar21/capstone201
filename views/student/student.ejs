@@ -1,36 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>My courses</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-    </head>
-    <body class="font-serif bg-slate-100">
-        <h1 class="text-center font-semibold text-5xl py-6 mt-16">Welcome!</h1>
-        <a href="/signout" class="signout bg-red-500 absolute top-10 right-28 py-1 px-1 border-2 border-black font-semibold">Signout</a>
-        <main class="flex justify-evenly">
-
-            <div id="enrolled-courses" class="bg-orange-300 p-4 rounded-sm">
-                <h2 class="font-semibold text-3xl">Enrolled Courses</h2>
-
-                <div class="card pb-4 border bg-white rounded-md shadow-md w-60 relative m-4 hover:shadow-xl">
-                    <h3 class="px-2 pb-2 text-2xl">Course name</h3>
-                    <p class="px-3 pb-2 text-md">Teacher name</p>
-                    <button class="view border-2 border-black px-1 rounded-sm mx-2 bg-violet-500">View course</button>
-                </div>
-            </div>
-
-            <div id="available-courses" class="bg-blue-300 p-4 rounded-sm">
-                <h2 class="font-semibold text-3xl">Available Courses</h2>
-                
-                <div class="card pb-4 border bg-white rounded-md shadow-md w-60 relative m-4 hover:shadow-xl">
-                    <h3 class="px-2 pb-2 text-2xl">Course name</h3>
-                    <p class="px-3 pb-2 text-md">Teacher name</p>
-                    <button class="view border-2 border-black px-1 rounded-sm mx-2 bg-violet-500">View course</button>
-                    <button class="enroll border-2 border-black px-1 rounded-sm mx-2 bg-green-500">Enroll</button>
-                </div>
-            </div>
-        </main>
-    </body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My courses</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="font-serif bg-slate-100">
+    <h1 class="text-center font-semibold text-5xl py-6 mt-16">Welcome!</h1>
+    <a
+      href="/signout"
+      class="signout bg-red-500 absolute top-10 right-28 py-1 px-1 border-2 border-black font-semibold"
+      >Signout</a
+    >
+    <main class="flex justify-evenly items-start">
+      <div id="enrolled-courses" class="bg-orange-300 p-4 rounded-sm">
+        <h2 class="font-semibold text-3xl">Enrolled Courses</h2>
+        <% for(let i = 0; i < enrolled.length; i++) { %>
+        <div
+          class="card pb-4 border bg-white rounded-md shadow-md w-60 relative m-4 hover:shadow-xl"
+        >
+          <h3 class="px-2 pb-2 text-2xl"><%= enrolled[i].name %></h3>
+          <p class="px-3 pb-2 text-md">
+            <%=enrolled[i].User.firstName%> <%= enrolled[i].User.lastName %>
+          </p>
+          <a
+            href="/course/<%= enrolled[i].courseId %>"
+            class="view border-2 border-black px-1 rounded-sm mx-2 bg-violet-500"
+          >
+            View course
+          </a>
+        </div>
+        <% } %>
+      </div>
+      <div id="available-courses" class="bg-blue-300 p-4 rounded-sm">
+        <h2 class="font-semibold text-3xl">Available Courses</h2>
+        <% for(let i = 0; i < notEnrolled.length; i++) { %>
+        <div
+          class="card pb-4 border bg-white rounded-md shadow-md w-60 relative m-4 hover:shadow-xl"
+        >
+          <h3 class="px-2 pb-2 text-2xl"><%= notEnrolled[i].name %></h3>
+          <p class="px-3 pb-2 text-md">
+            <%=notEnrolled[i].User.firstName%> <%= notEnrolled[i].User.lastName
+            %>
+          </p>
+          <a
+            href="/course/<%= notEnrolled[i].id %>"
+            class="view border-2 border-black px-1 rounded-sm mx-2 bg-violet-500"
+          >
+            View Course
+          </a>
+          <form action="/enroll" method="post" class="inline">
+            <input
+              type="hidden"
+              name="courseId"
+              value="<%= notEnrolled[i].id %>"
+            />
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <button
+              class="view border-2 border-black px-1 rounded-sm mx-2 bg-blue-500"
+            >
+              Enroll
+            </button>
+          </form>
+        </div>
+        <% } %>
+      </div>
+    </main>
+  </body>
 </html>
