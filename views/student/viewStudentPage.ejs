@@ -19,11 +19,19 @@
       >
         <- Previous
       </a>
-      <% } %>
-      <button class="bg-blue-600 border-2 px-1 rounded-sm border-black">
-        Mark as complete
-      </button>
-      <% if(nextPageId !== -1) { %>
+      <% } %> <% if(!markedComplete) { %>
+      <form action="/markComplete" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="hidden" name="pageId" value="<%= thisPage.id %>" />
+        <button class="bg-blue-600 border-2 px-1 rounded-sm border-black">
+          Mark as complete
+        </button>
+      </form>
+      <% } else { %>
+      <div class="bg-green-600 border-2 px-1 rounded-sm border-black">
+        Completed
+      </div>
+      <% } %> <% if(nextPageId !== -1) { %>
       <a
         href="/page/<%= nextPageId %>"
         class="bg-green-500 border-2 px-1 rounded-sm border-black"

@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="font-serif bg-slate-100">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
     <h1 class="text-center font-semibold text-5xl py-6 mt-16">Welcome!</h1>
     <a
       href="/signout"

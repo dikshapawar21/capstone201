@@ -167,4 +167,26 @@ describe("Learning Management Application", function () {
     expect(res.text.includes("/home")).toBe(true);
     expect(res.statusCode).toBe(302);
   });
+  test("Mark a page as complete", async () => {
+    let res;
+    const agent = request.agent(server);
+    await login(agent, "usera@gmail.com", "userARocks");
+    let csrfToken = extractCSRFToken(await agent.get("/chapter/2/newPage"));
+    res = await agent.post("/page").send({
+      _csrf: csrfToken,
+      name: "Why HTML?",
+      content: "Because HTML makes webpage body",
+      chapterId: 2,
+    });
+    await agent.get("/signout");
+    await login(agent, "studentpawar@gmail.com", "1234567890");
+    res = await agent.get("/home");
+    csrfToken = extractCSRFToken(res);
+    res = await agent.post("/markComplete").send({
+      _csrf: csrfToken,
+      pageId: 2,
+    });
+    expect(res.text.includes("/page/2")).toBe(true);
+    expect(res.statusCode).toBe(302);
+  });
 });

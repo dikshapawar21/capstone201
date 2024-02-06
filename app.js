@@ -2,7 +2,14 @@ const express = require("express");
 const csurf = require("tiny-csrf");
 const cookieParser = require("cookie-parser");
 const app = express();
-const { User, Course, Chapter, Page, Enrollment } = require("./models");
+const {
+  User,
+  Course,
+  Chapter,
+  Page,
+  Enrollment,
+  MarkComplete,
+} = require("./models");
 
 const passport = require("passport");
 const connectEnsureLogin = require("connect-ensure-login");
@@ -272,27 +279,35 @@ app.get(
   "/chapter/:id",
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
-    const chapterId = req.params.id;
-    const chapter = await Chapter.findOne({
-      where: { id: chapterId },
-      include: Course,
-    });
-    if (
-      (
-        await Enrollment.findOne({
+    try {
+      const chapterId = req.params.id;
+      const chapter = await Chapter.findOne({
+        where: { id: chapterId },
+        include: Course,
+      });
+      if (
+        (await Enrollment.findOne({
           where: { userId: req.user.id, courseId: chapter.Course.id },
-        })
-      ).length === 0 &&
-      chapter.Course.userId !== req.user.id
-    ) {
-      return res.redirect("/home");
+        })) &&
+        (
+          await Enrollment.findOne({
+            where: { userId: req.user.id, courseId: chapter.Course.id },
+          })
+        ).length === 0 &&
+        chapter.Course.userId !== req.user.id
+      ) {
+        return res.redirect("/home");
+      }
+      const pages = await Page.findAll({ where: { chapterId } });
+      res.render("educator/viewEducatorChapter", {
+        csrfToken: req.csrfToken(),
+        chapter,
+        pages,
+      });
+    } catch (error) {
+      console.log("WADDA ERROR", error);
+      res.json(error);
     }
-    const pages = await Page.findAll({ where: { chapterId } });
-    res.render("educator/viewEducatorChapter", {
-      csrfToken: req.csrfToken(),
-      chapter,
-      pages,
-    });
   }
 );
 
@@ -337,7 +352,7 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
     if (req.user.designation !== "educator") {
-      return res.redirect("/");
+      return res.redirect("/home");
     }
     res.render("newPage", {
       csrfToken: req.csrfToken(),
@@ -390,9 +405,19 @@ app.get("/page/:id", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     });
   } else {
     return res.render("student/viewStudentPage", {
+      csrfToken: req.csrfToken(),
       thisPage,
       nextPageId,
       prevPageId,
+      markedComplete:
+        (
+          await MarkComplete.findAll({
+            where: {
+              userId: req.user.id,
+              pageId: req.params.id,
+            },
+          })
+        ).length > 0,
     });
   }
 });
@@ -449,5 +474,36 @@ app.post("/enroll", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   });
   res.redirect(`/home`);
 });
+
+app.post(
+  "/markComplete",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    const { pageId } = req.body;
+    const userId = req.user.id;
+    const page = await Page.findOne({
+      where: { id: pageId },
+      include: {
+        model: Chapter,
+        include: Course,
+      },
+    });
+    if (
+      req.user.designation !== "student" ||
+      (
+        await Enrollment.findOne({
+          where: { userId: userId, courseId: page.Chapter.Course.id },
+        })
+      ).length === 0
+    ) {
+      return res.redirect("/home");
+    }
+    await MarkComplete.create({
+      userId,
+      pageId,
+    });
+    res.redirect(`/page/${pageId}`);
+  }
+);
 
 module.exports = app;

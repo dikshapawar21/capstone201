@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
         through: models.Enrollment,
         foreignKey: "userId",
       });
+      User.belongsToMany(models.Page, {
+        through: models.MarkComplete,
+        foreignKey: "userId",
+      });
     }
     static delete() {
       this.destroy();
