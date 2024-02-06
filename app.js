@@ -311,4 +311,27 @@ app.post("/page", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   }
 });
 
+app.delete("/page", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  const { pageId } = req.body;
+  const page = await Page.findOne({
+    where: {
+      id: pageId,
+    },
+    include: {
+      model: Chapter,
+      include: {
+        model: Course,
+        include: {
+          model: User,
+        },
+      },
+    },
+  });
+  if (page.Chapter.Course.User.id !== req.user.id) {
+    res.redirect("/");
+  }
+  await page.destroy();
+  res.redirect("/chapter/" + page.Chapter.id);
+});
+
 module.exports = app;

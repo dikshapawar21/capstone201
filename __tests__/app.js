@@ -135,4 +135,16 @@ describe("Learning Management Application", function () {
     console.log(res.text.includes("/chapter"));
     expect(res.statusCode).toBe(302);
   });
+
+  test("Create a page", async () => {
+    const agent = request.agent(server);
+    await login(agent, "usera@gmail.com", "userARocks");
+    let csrfToken = extractCSRFToken(await agent.get("/login"));
+    let res = await agent.delete("/page").send({
+      _csrf: csrfToken,
+      pageId: 1,
+    });
+    expect(res.text.includes("/chapter")).toBe(true);
+    expect(res.statusCode).toBe(302);
+  });
 });
