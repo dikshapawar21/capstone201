@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <main class="font-serif">
+      <h1 class="font-semibold text-4xl mt-20 ml-60"><%= chapter.name %></h1>
+      <br /><br />
+      <h2 class="ml-60 text-2xl underline">Pages</h2>
+      <br />
+      <% if (pages.length === 0) { %>
+      <p class="ml-60 text-lg">There are no pages available. Create one?</p>
+      <% } else { %>
+      <div class="ml-60 flex flex-col">
+        <% for(let i = 0; i < pages.length; i++) { %>
+        <a class="mb-2 bg-amber-100 w-80 px-4 py-2"><%= pages[i].name %></a>
+        <% } %>
+      </div>
+      <% } %>
+      <button
+        class="border-2 border-black px-1 rounded-sm mx-2 bg-violet-500 ml-60 mt-4 text-xl"
+      >
+        Create a new page
+      </button>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Chapters</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <main class="font-serif">
+      <h1 class="font-semibold text-4xl mt-20 ml-60"><%= course.name %></h1>
+      <br />
+      <div class="ml-60 text-lg"><%= course.description %></div>
+      <br />
+      <h2 class="ml-60 text-2xl underline">Chapters</h2>
+      <br />
+      <% if(chapters.length === 0) { %>
+      <p class="ml-60 text-lg">There are no chapters available.Create one?</p>
+      <% } else { %>
+      <div class="ml-60 flex flex-col items-start">
+        <% for(let i = 0; i < chapters.length; i++) { %>
+        <a
+          class="mb-2 bg-amber-100 w-80 px-2 pr-80 py-2"
+          href="/chapter/<%= chapters[i].id %>"
+          ><%= chapters[i].name %></a
+        >
+        <% } %>
+      </div>
+      <% } %>
+      <br />
+      <a
+        href="/newChapter"
+        class="border-2 border-black px-1 rounded-sm mx-2 bg-violet-500 ml-60 mt-20 text-xl"
+      >
+        Create a new chapter
+      </a>
+    </main>
+  </body>
+</html>

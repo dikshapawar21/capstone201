@@ -187,7 +187,16 @@ app.get("/newCourse", connectEnsureLogin.ensureLoggedIn(), (req, res) => {
 
 app.get("/course/:id", async (req, res) => {
   const course = await Course.findByPk(req.params.id, { include: User });
-  res.render("viewCourse", { course });
+  const chapters = await Chapter.findAll({
+    where: {
+      courseId: course.id,
+    },
+  });
+  if (req.user && req.user.designation === "educator") {
+    return res.render("viewEducatorCourse", { course, chapters });
+  } else {
+    return res.render("viewStudentCourse", { course, chapters });
+  }
 });
 
 app.post("/course", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
@@ -214,7 +223,39 @@ app.delete("/course", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   return res.redirect("/home");
 });
 
-//Page routes
+//Chapter routes
+app.get(
+  "/newChapter",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    if (req.user.designation !== "educator") {
+      return res.redirect("/home");
+    }
+    const courses = await Course.findAll({
+      where: {
+        userId: req.user.id,
+      },
+    });
+    res.render("newChapter", { csrfToken: req.csrfToken(), courses });
+  }
+);
+
+app.get(
+  "/chapter/:id",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    const chapterId = req.params.id;
+    const chapter = await Chapter.findOne({
+      where: { id: chapterId },
+      include: Course,
+    });
+    res.render("viewEducatorChapter", {
+      chapter,
+      pages: [{ name: "SOMETING" }, { name: "SLKJSFLKJF" }],
+    });
+  }
+);
+
 app.post("/chapter", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const { courseId } = req.body;
   const course = await Course.findByPk(courseId);
