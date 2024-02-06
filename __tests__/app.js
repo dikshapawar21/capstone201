@@ -83,4 +83,37 @@ describe("Learning Management Application", function () {
     expect(res.text.includes("/home")).toBe(true);
     expect(res.statusCode).toBe(302);
   });
+
+  test("Creates a new chapter", async () => {
+    const agent = request.agent(server);
+    await login(agent, "usera@gmail.com", "userARocks");
+    let csrfToken = extractCSRFToken(await agent.get("/login"));
+    let res = await agent.post("/course").send({
+      _csrf: csrfToken,
+      name: "Frontend Course",
+      description:
+        "Comprehensive course on frontend with HTML CSS and JavaScript",
+    });
+
+    csrfToken = extractCSRFToken(await agent.get("/login"));
+    res = await agent.post("/chapter").send({
+      _csrf: csrfToken,
+      courseId: 2,
+      name: "What is HTML?",
+    });
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Deletes a chapter", async () => {
+    const agent = request.agent(server);
+    await login(agent, "usera@gmail.com", "userARocks");
+    const csrfToken = extractCSRFToken(await agent.get("/login"));
+    let res = await agent.delete("/chapter").send({
+      _csrf: csrfToken,
+      chapterId: 1,
+    });
+    console.log(res.text);
+    expect(res.text.includes("/course")).toBe(true);
+    expect(res.statusCode).toBe(302);
+  });
 });

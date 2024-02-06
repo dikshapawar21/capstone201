@@ -2,7 +2,7 @@ const express = require("express");
 const csurf = require("tiny-csrf");
 const cookieParser = require("cookie-parser");
 const app = express();
-const { User, Course } = require("./models");
+const { User, Course, Chapter } = require("./models");
 
 const passport = require("passport");
 const connectEnsureLogin = require("connect-ensure-login");
@@ -137,6 +137,46 @@ app.get("/home", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   }
 });
 
+app.post("/user", async (req, res) => {
+  const hashPwd = await bcrypt.hash(req.body.password, saltRounds);
+  try {
+    if (req.body.password === "") {
+      throw new Error("password is empty");
+    }
+    console.log("Creating user: ", req.body);
+    let user = await User.create({
+      firstName: req.body.fname,
+      lastName: req.body.lname,
+      email: req.body.email,
+      designation: req.body.designation,
+      password: hashPwd,
+    });
+    console.log("User created:", user.dataValues);
+    req.login(user, (err) => {
+      if (err) {
+        console.log(err);
+      }
+      res.status(301).redirect("/home");
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ message: error });
+  }
+});
+
+app.post(
+  "/session",
+  passport.authenticate("local", {
+    failureRedirect: "/login",
+    failureFlash: true,
+  }),
+  async (req, res) => {
+    console.log(req.body);
+    res.redirect("/home");
+  }
+);
+
+// Course routes
 app.get("/newCourse", connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   if (req.user.designation === "educator") {
     res.render("newCourse", { csrfToken: req.csrfToken() });
@@ -174,42 +214,40 @@ app.delete("/course", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   return res.redirect("/home");
 });
 
-app.post("/user", async (req, res) => {
-  const hashPwd = await bcrypt.hash(req.body.password, saltRounds);
-  try {
-    if (req.body.password === "") {
-      throw new Error("password is empty");
-    }
-    console.log("Creating user: ", req.body);
-    let user = await User.create({
-      firstName: req.body.fname,
-      lastName: req.body.lname,
-      email: req.body.email,
-      designation: req.body.designation,
-      password: hashPwd,
-    });
-    console.log("User created:", user.dataValues);
-    req.login(user, (err) => {
-      if (err) {
-        console.log(err);
-      }
-      res.status(301).redirect("/home");
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(401).json({ message: error });
+//Page routes
+app.post("/chapter", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  const { courseId } = req.body;
+  const course = await Course.findByPk(courseId);
+  if (course.userId !== req.user.id) {
+    res.status(400).redirect("/home");
   }
+  const chapter = await Chapter.create({
+    courseId,
+    name: req.body.name,
+  });
+  console.log("New Chapter created:", chapter);
+  res.redirect("/course/" + courseId);
 });
 
-app.post(
-  "/session",
-  passport.authenticate("local", {
-    failureRedirect: "/login",
-    failureFlash: true,
-  }),
+app.delete(
+  "/chapter",
+  connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
-    console.log(req.body);
-    res.redirect("/home");
+    try {
+      const { chapterId } = req.body;
+      const chapter = await Chapter.findOne({
+        where: { id: chapterId },
+        include: Course,
+      });
+      if (chapter.Course.userId !== req.user.id) {
+        res.status(400).redirect("/home");
+      }
+      await chapter.destroy();
+      res.redirect("/course/" + chapter.Course.id);
+    } catch (err) {
+      console.log(err);
+      res.json(err);
+    }
   }
 );
 
