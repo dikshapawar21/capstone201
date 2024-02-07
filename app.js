@@ -368,6 +368,7 @@ app.get("/page/:id", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     include: { model: Course },
   });
   if (
+    await Enrollment.findOne({where:{userId:req.user.id,courseId:chapter.Course.id}})&&
     (
       await Enrollment.findOne({
         where: { userId: req.user.id, courseId: chapter.Course.id },
