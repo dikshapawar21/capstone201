@@ -506,4 +506,33 @@ app.post(
   }
 );
 
+app.get("/password", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  res.render("changePassword", { csrfToken: req.csrfToken() });
+});
+
+app.post("/password", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  try {
+    if (req.body.newPassword.length < 5) {
+      throw new Error("Password shorter than 5 characters");
+    }
+    const user = await User.findByPk(req.user.id);
+    if (!(await bcrypt.compare(req.body.oldPassword, user.password))) {
+      throw new Error("Wrong old password");
+    }
+    const newPwdHash = await bcrypt.hash(req.body.newPassword, 10);
+    await User.update(
+      { password: newPwdHash },
+      {
+        where: {
+          id: req.user.id,
+        },
+      }
+    );
+    res.redirect("/signout");
+  } catch (error) {
+    req.flash(error);
+    res.redirect("/password");
+  }
+});
+
 module.exports = app;

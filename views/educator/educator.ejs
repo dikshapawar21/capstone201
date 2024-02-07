@@ -7,16 +7,26 @@
     <script src="https://cdn.tailwindcss.com/3.4.1"></script>
   </head>
   <body class="font-serif bg-slate-100">
-    <h1 class="text-center font-semibold text-5xl pt-4 pb-2 mt-16">Welcome!</h1>
-    <h2 class="text-start pl-32 underline text-3xl py-3">
-      Administrative actions
-    </h2>
-    <a
-      href="/signout"
-      class="signout bg-red-500 absolute top-10 right-28 py-1 px-1 border-2 border-black font-semibold"
-    >
-      Signout
-    </a>
+    <div class="flex items-center justify-evenly h-48">
+      <h1 class="text-center font-semibold text-5xl pt-4 pb-2">Welcome!</h1>
+      <h2 class="text-start pl-32 underline text-3xl py-3">
+        Administrative actions
+      </h2>
+      <div>
+        <a
+          href="/password"
+          class="signout bg-green-500 top-10 mx-4 right-28 py-1 px-1 border-2 border-black font-semibold"
+        >
+          Change password
+        </a>
+        <a
+          href="/signout"
+          class="signout bg-red-500 top-10 right-28 py-1 px-1 border-2 border-black font-semibold"
+        >
+          Signout
+        </a>
+      </div>
+    </div>
 
     <main>
       <a
